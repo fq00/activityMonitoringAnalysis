@@ -10,9 +10,11 @@ We make use of data from a personal activity monitoring device. This device coll
 ## Files and folders
 
 This repo constins the follwing files.
+
 - data.csv : the file with the raw data;
 - activityMonitoringAnalysis.Rmd : the Rmd file containing the analysis;
 - activityMonitoringAnalysis.html : the resulting .html file
+
 The code for the analysis is displayed in the .rmd file. The results can be viewed in the .html file.
 
 ## Conclusions
