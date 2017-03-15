@@ -1,0 +1,88 @@
+---
+title: "activityMonitoringAnalysis"
+author: "Francesco Quinzan"
+date: "3/13/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+It is now possible to collect a large amount of data about personal movement using activity monitoring devices such as a Fitbit, Nike Fuelband, or Jawbone Up. These type of devices are part of the “quantified self” movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. But these data remain under-utilized both because the raw data are hard to obtain and there is a lack of statistical methods and software for processing and interpreting the data.
+
+This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
+
+## Data
+
+The data for this assignment can be downloaded from the course web site.
+
+The variables included in this dataset are:
+
+- steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)
+- date: The date on which the measurement was taken in YYYY-MM-DD format
+- interval: Identifier for the 5-minute interval in which measurement was taken
+
+The dataset is stored in a comma-separated-value (CSV) file and there are a total of 17,568 observations in this dataset.
+
+```{r}
+
+activityData <- read.csv("~/Desktop/data.csv")
+```
+
+We now clean the data, and check the property of the resulting data frame.
+
+```{r}
+activityData$date <- as.Date(activityData$date, "%Y-%m-%d")
+str(activityData)
+dim(activityData)
+head(activityData)
+```
+
+The previous output shows we have indeed the number of observations and variables mentioned in the assignment description, and we can see that during the first day of data collection we have several intervals with missing values that we will need to deal later with. 
+
+## Analysis
+### The mean of total number of steps taken per day.
+
+We use dplyr to group and summarize the data and store it in the variable AvgDay, the following lines calculate the total number of steps per day and the mean number of daily steps: 
+
+```{r}
+library (dplyr)
+AvgDay <- activityData %>% group_by(date) %>%
+          summarize(total.steps = sum(steps, na.rm = T), 
+                  mean.steps = mean(steps, na.rm = T))
+```
+
+Once the summaries are calculated, we can construct the histogram of the total steps:
+
+```{r}
+library(ggplot2)
+g <- ggplot(AvgDay, aes(x=total.steps))
+g + geom_histogram(binwidth = 2500) + theme(axis.text = element_text(size = 12),  
+      axis.title = element_text(size = 14)) + labs(y = "Frequency") + labs(x = "Total steps/day")
+```
+
+The histogram shows the largest count around the 10000-12500 step class thus we can infer that the median will be in this interval, the data is symmetrically distributed around the center of the distribution, except for one class at the extreme left. Let's get a summary of the data, which will include the mean and the median, to get a more quantitative insight of the data:
+
+```{r}
+summary(AvgDay$total.steps)
+summary (AvgDay$mean.steps)
+```
+
+Observe that the mean and the median of the total steps are close in value, but also that there are 8 missing values.
+
+### Daily activity pattern.
+
+In this section we will average the number of steps across each 5 min interval, this will give us an idea of the periods where the person might be the most and the least active (aka, a screen shot of a “typical/average” day). We group the data by interval this time and then calculate the mean of each interval goup:
+
+```{r}
+AvgInterval <- activityData %>% group_by(interval) %>%
+      summarize(mean.steps = mean(steps, na.rm = T))
+g <- ggplot(AvgInterval, aes(x = interval, y = mean.steps))
+g + geom_line() + theme(axis.text = element_text(size = 12), 
+      axis.title = element_text(size = 14, face = "bold")) + 
+      labs(y = "Mean number of steps") + labs(x = "Interval")
+```
+
